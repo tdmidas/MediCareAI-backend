@@ -1,8 +1,9 @@
 const { initializeApp } = require("firebase/app");
 const { getAuth } = require("firebase/auth");
 const { getFirestore } = require("firebase/firestore");
+require("dotenv").config();
 const firebaseConfig = {
-	apiKey: "AIzaSyCrKEWN_0gFq66oURJCdcMkfGrdgcKVYk0",
+	apiKey: process.env.FIREBASE_API_KEY,
 	authDomain: "medicareai.firebaseapp.com",
 	databaseURL: "https://medicareai-default-rtdb.asia-southeast1.firebasedatabase.app",
 	projectId: "medicareai",
