@@ -1,7 +1,6 @@
 const { db } = require("../../database/config");
 const { doc, setDoc, collection, getDoc, updateDoc, deleteDoc } = require("firebase/firestore");
 
-// Create operation for Blood Pressure
 const createBloodPressure = async (req, res) => {
 	try {
 		const id = req.params.userId;
@@ -13,9 +12,17 @@ const createBloodPressure = async (req, res) => {
 			status: req.body.status,
 			date: new Date(),
 		};
+
 		const bloodPressureRef = doc(collection(db, "bloodPressure"), id);
-		await setDoc(bloodPressureRef, data);
-		res.status(201).json({ message: "Blood pressure record created successfully" });
+		const docSnapshot = await getDoc(bloodPressureRef);
+		if (docSnapshot.exists()) {
+			await updateDoc(bloodPressureRef, data);
+			res.status(200).json({ message: "Blood pressure record updated successfully" });
+		} else {
+			await setDoc(bloodPressureRef, data);
+
+			res.status(201).json({ message: "Blood pressure record created successfully" });
+		}
 	} catch (error) {
 		res.status(500).json({ error: "Error creating blood pressure record: " + error.message });
 	}

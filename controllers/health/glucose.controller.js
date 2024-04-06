@@ -11,11 +11,22 @@ const createGlucose = async (req, res) => {
 			status: req.body.status,
 			date: new Date(),
 		};
+
+		// Check if the document exists
 		const glucoseRef = doc(collection(db, "glucose"), id);
-		await setDoc(glucoseRef, data);
-		res.status(201).json({ message: "Glucose record created successfully" });
+		const docSnapshot = await getDoc(glucoseRef);
+
+		if (docSnapshot.exists()) {
+			// If the document exists, update it
+			await updateDoc(glucoseRef, data);
+			res.status(200).json({ message: "Glucose record updated successfully" });
+		} else {
+			// If the document doesn't exist, handle the situation (e.g., create a new document)
+			await setDoc(glucoseRef, data);
+			res.status(201).json({ message: "Glucose record created successfully" });
+		}
 	} catch (error) {
-		res.status(500).json({ error: "Error creating Glucose record: " + error.message });
+		res.status(500).json({ error: "Error updating/creating Glucose record: " + error.message });
 	}
 };
 

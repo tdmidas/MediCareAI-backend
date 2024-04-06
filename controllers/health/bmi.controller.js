@@ -1,7 +1,6 @@
 const { db } = require("../../database/config");
 const { doc, setDoc, collection, getDoc, updateDoc, deleteDoc } = require("firebase/firestore");
 
-// Create operation
 const createBMI = async (req, res) => {
 	try {
 		const id = req.params.userId;
@@ -11,15 +10,23 @@ const createBMI = async (req, res) => {
 			status: req.body.status,
 			date: new Date(),
 		};
+
 		const bmiRef = doc(collection(db, "bmi"), id);
-		await setDoc(bmiRef, data);
-		res.status(201).json({ message: "BMI record created successfully" });
+
+		const docSnapshot = await getDoc(bmiRef);
+
+		if (docSnapshot.exists()) {
+			await updateDoc(bmiRef, data);
+			res.status(200).json({ message: "BMI record updated successfully" });
+		} else {
+			await setDoc(bmiRef, data);
+			res.status(201).json({ message: "BMI record created successfully" });
+		}
 	} catch (error) {
-		res.status(500).json({ error: "Error creating BMI record: " + error.message });
+		res.status(500).json({ error: "Error creating/updating BMI record: " + error.message });
 	}
 };
 
-// Read operation
 const getBMIById = async (req, res) => {
 	try {
 		const id = req.params.userId;
@@ -35,7 +42,6 @@ const getBMIById = async (req, res) => {
 	}
 };
 
-// Update operation
 const updateBMI = async (req, res) => {
 	try {
 		const id = req.params.userId;
@@ -48,7 +54,6 @@ const updateBMI = async (req, res) => {
 	}
 };
 
-// Delete operation
 const deleteBMI = async (req, res) => {
 	try {
 		const id = req.params.userId;
