@@ -4,7 +4,7 @@ import joblib
 app = Flask(__name__)
 
 # Load the trained model
-model = joblib.load("model.pkl")
+model = joblib.load("rf_model.pkl")
 
 # Define the predict route
 @app.route('/predict', methods=['POST'])
@@ -17,7 +17,7 @@ def predict():
         prediction = model.predict([data['input']])  # Assuming 'input' is the key for your input data
 
         # Return the prediction as JSON response
-        return jsonify({'prediction': prediction.tolist()}), 200
+        return jsonify({'prediction': int(prediction)}), 200
 
     except Exception as e:
         # Return error message if something goes wrong

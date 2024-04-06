@@ -8,7 +8,7 @@ const predictHealthStatus = async (inputData) => {
 			input: inputData,
 		});
 		const prediction = response.data.prediction;
-		return prediction === 1 ? "Great" : "Poor";
+		return prediction === 0 ? "Great" : "Poor";
 	} catch (error) {
 		console.error("Error predicting health status:", error);
 		throw new Error("Failed to predict health status");
@@ -35,12 +35,12 @@ const createHealthData = async (req, res) => {
 		// Combine all data into healthData object
 		const healthData = {
 			userId: userId,
-			bmi: bmiData.bmi,
+			BMI: bmiData.BMI,
 			bmiStatus: bmiData.status,
 			glucose: glucoseData.glucose,
 			glucoseStatus: glucoseData.status,
-			sysBloodPressure: bloodPressureData.sysBloodPressure,
-			diaBloodPressure: bloodPressureData.diaBloodPressure,
+			sysBP: bloodPressureData.sysBP,
+			diaBP: bloodPressureData.diaBP,
 			heartRate: bloodPressureData.heartRate,
 			bloodStatus: bloodPressureData.status,
 		};
@@ -60,18 +60,17 @@ const getHealthDataByuserId = async (req, res) => {
 		const usersCollection = collection(db, "HealthOverall");
 		const docRef = doc(usersCollection, userId);
 		const snapshot = await getDoc(docRef);
-		const { sysBloodPressure, diaBloodPressure, bloodStatus, heartRate, bmi, bmiStatus, glucose, glucoseStatus } =
-			snapshot.data();
-		const predict = await predictHealthStatus([sysBloodPressure, diaBloodPressure, heartRate, bmi, glucose]);
+		const { sysBP, diaBP, bloodStatus, heartRate, BMI, bmiStatus, glucose, glucoseStatus } = snapshot.data();
+		const predict = await predictHealthStatus([sysBP, diaBP, BMI, heartRate, glucose]);
 		if (!snapshot.exists()) {
 			return res.status(404).json({ message: "Health data not found for this user" });
 		}
 		return res.status(200).json({
-			sysBloodPressure,
-			diaBloodPressure,
+			sysBP,
+			diaBP,
 			heartRate,
 			bloodStatus,
-			bmi,
+			BMI,
 			bmiStatus,
 			glucose,
 			glucoseStatus,
@@ -85,7 +84,7 @@ const getHealthDataByuserId = async (req, res) => {
 const updateHealthDataByuserId = async (req, res) => {
 	try {
 		const userId = req.params.userId;
-		const { sysBloodPressure, diaBloodPressure, heartRate, bmi, glucose } = req.body;
+		const { sysBP, diaBP, heartRate, BMI, glucose } = req.body;
 		const usersCollection = collection(db, "HealthOverall");
 		const docRef = doc(usersCollection, userId);
 		const snapshot = await getDoc(docRef);
@@ -93,10 +92,10 @@ const updateHealthDataByuserId = async (req, res) => {
 			return res.status(404).json({ message: "Health data not found for this user" });
 		}
 		await updateDoc(snapshot.ref, {
-			sysBloodPressure,
-			diaBloodPressure,
+			sysBP,
+			diaBP,
 			heartRate,
-			bmi,
+			BMI,
 			glucose,
 		});
 		return res.status(200).json({ message: "Health data updated successfully" });

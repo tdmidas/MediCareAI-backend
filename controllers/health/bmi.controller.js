@@ -6,7 +6,7 @@ const createBMI = async (req, res) => {
 		const id = req.params.userId;
 		const data = {
 			userId: id,
-			bmi: req.body.bmi,
+			BMI: req.body.bmi,
 			status: req.body.status,
 			date: new Date(),
 		};

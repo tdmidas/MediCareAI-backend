@@ -6,8 +6,8 @@ const createBloodPressure = async (req, res) => {
 		const id = req.params.userId;
 		const data = {
 			userId: id,
-			sysBloodPressure: req.body.sysBloodPressure,
-			diaBloodPressure: req.body.diaBloodPressure,
+			sysBP: req.body.sysBP,
+			diaBP: req.body.diaBP,
 			heartRate: req.body.heartRate,
 			status: req.body.status,
 			date: new Date(),
