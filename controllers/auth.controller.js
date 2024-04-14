@@ -65,7 +65,7 @@ const login = async (req, res) => {
 
 		const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-		return res.status(200).json({ message: "Login successful", access_token: token });
+		return res.status(200).json({ message: "Login successful", accessToken: token, userId: user.userId });
 	} catch (error) {
 		if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
 			return res.status(401).json({ message: "Invalid email or password" });
