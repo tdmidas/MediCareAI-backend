@@ -1,5 +1,5 @@
 const { auth, db } = require("../database/config");
-const { doc, setDoc, collection, getDoc } = require("firebase/firestore");
+const { doc, setDoc, collection, getDocs } = require("firebase/firestore");
 const { createUserWithEmailAndPassword, signInWithEmailAndPassword } = require("firebase/auth");
 const uuid = require("uuid");
 const bcrypt = require("bcrypt");
@@ -19,6 +19,7 @@ const signup = async (req, res) => {
 			name: req.body.name,
 			email: req.body.email,
 			password: hashedPassword,
+			isAdmin: false,
 			userLastlogin: null,
 		};
 		const id = req.body.email;
@@ -39,15 +40,32 @@ const login = async (req, res) => {
 	try {
 		await signInWithEmailAndPassword(auth, email, password);
 
-		const token = jwt.sign({ email: email }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
 		const usersCollection = collection(db, "users");
-		const userDoc = doc(usersCollection, email);
-		const userCredentials = await getDoc(userDoc);
-		const id = userCredentials.data().userId;
-		await setDoc(userDoc, { userLastlogin: new Date() }, { merge: true });
+		const querySnapshot = await getDocs(usersCollection);
+		let user;
 
-		return res.status(200).json({ message: "Login successful", access_token: token, userId: id });
+		querySnapshot.forEach((doc) => {
+			const userData = doc.data();
+			if (userData.email === email) {
+				user = userData;
+				setDoc(doc.ref, { userLastlogin: new Date() }, { merge: true });
+			}
+		});
+
+		if (!user) {
+			return res.status(401).json({ message: "User not found" });
+		}
+
+		const tokenPayload = {
+			userId: user.userId,
+			email: user.email,
+			isAdmin: user.isAdmin || false,
+			// Add other user data here
+		};
+
+		const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+		return res.status(200).json({ message: "Login successful", access_token: token });
 	} catch (error) {
 		if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
 			return res.status(401).json({ message: "Invalid email or password" });

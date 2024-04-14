@@ -9,11 +9,10 @@ const glucoseRoutes = require("./routes/glucose.route");
 const bloodPressureRoutes = require("./routes/bloodPressure.route");
 const healthRoutes = require("./routes/health.route");
 const app = express();
-
+const uploadRoute = require("./routes/upload.route");
+const doctorRoutes = require("./routes/doctor.route");
 //dotenv conffig
 dotenv.config();
-//db
-
 //Port
 const PORT = process.env.PORT || 5000;
 app.use(bodyParser.json({ limit: "50mb" }));
@@ -31,6 +30,8 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/upload", uploadRoute);
+app.use("/api/doctors", doctorRoutes);
 app.use("/api/health/bmi", bmiRoutes);
 app.use("/api/health/glucose", glucoseRoutes);
 app.use("/api/health/bloodPressure", bloodPressureRoutes);
