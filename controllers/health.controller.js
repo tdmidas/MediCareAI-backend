@@ -4,7 +4,7 @@ const axios = require("axios");
 
 const predictHealthStatus = async (inputData) => {
 	try {
-		const response = await axios.post("http://localhost:6000/predict", {
+		const response = await axios.post("https://medicare-model.netlify.app", {
 			input: inputData,
 		});
 		const prediction = response.data.prediction;
