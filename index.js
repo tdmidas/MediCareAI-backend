@@ -8,12 +8,15 @@ const bmiRoutes = require("./routes/bmi.route");
 const glucoseRoutes = require("./routes/glucose.route");
 const bloodPressureRoutes = require("./routes/bloodPressure.route");
 const healthRoutes = require("./routes/health.route");
-const app = express();
 const doctorRoutes = require("./routes/doctor.route");
+const userRoutes = require("./routes/user.route");
+// App Config
+const app = express();
 //dotenv conffig
 dotenv.config();
 //Port
 const PORT = process.env.PORT || 5000;
+// Middleware
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
@@ -24,11 +27,11 @@ app.use(
 	})
 );
 app.use(morgan("common"));
-// Middleware
 app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/doctors", doctorRoutes);
 app.use("/api/health/bmi", bmiRoutes);
 app.use("/api/health/glucose", glucoseRoutes);
