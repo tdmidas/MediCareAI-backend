@@ -15,7 +15,7 @@ router.post("/", authenticate, authorize, createDoctor);
 router.get("/", getAllDoctors);
 
 // Get a single doctor by doctorId
-router.get("/:id", authenticate, getDoctorById);
+router.get("/:id", getDoctorById);
 
 // Update a doctor by doctorId
 router.put("/:id", authenticate, authorize, updateDoctor);

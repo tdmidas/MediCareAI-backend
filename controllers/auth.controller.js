@@ -1,3 +1,5 @@
+// auth.controller.js
+
 const { auth, db } = require("../database/config");
 const { doc, setDoc, collection, getDocs } = require("firebase/firestore");
 const { createUserWithEmailAndPassword, signInWithEmailAndPassword } = require("firebase/auth");
@@ -5,6 +7,7 @@ const uuid = require("uuid");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+// Function to create a new user
 const signup = async (req, res) => {
 	const { password } = req.body;
 
@@ -38,6 +41,7 @@ const signup = async (req, res) => {
 	}
 };
 
+// Function to log in a user
 const login = async (req, res) => {
 	const { email, password } = req.body;
 
@@ -66,6 +70,9 @@ const login = async (req, res) => {
 
 		const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
+		// Set user ID in session
+		req.session.userId = user.userId;
+
 		return res.status(200).json({
 			message: "Login successful",
 			accessToken: token,
@@ -84,7 +91,15 @@ const login = async (req, res) => {
 	}
 };
 
+// Function to log out a user
+const logout = (req, res) => {
+	// Destroy session to log out user
+	req.session = null;
+	res.send("Logged out successfully");
+};
+
 module.exports = {
 	signup,
 	login,
+	logout,
 };
