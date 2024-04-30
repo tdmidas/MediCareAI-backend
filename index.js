@@ -12,6 +12,7 @@ const healthRoutes = require("./routes/health.route");
 const doctorRoutes = require("./routes/doctor.route");
 const userRoutes = require("./routes/user.route");
 const reviewRoutes = require("./routes/review.route");
+const uploadRoutes = require("./routes/upload.route");
 const chatbotRoutes = require("./routes/chatbot.route");
 const serverless = require("serverless-http");
 
@@ -54,6 +55,7 @@ app.use(sessionMiddleware);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/doctors", doctorRoutes);
+app.use("/api/upload", uploadRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/health/bmi", bmiRoutes);
 app.use("/api/health/glucose", glucoseRoutes);
