@@ -4,7 +4,7 @@ const axios = require("axios");
 
 const predictHealthStatus = async (inputData) => {
 	try {
-		const response = await axios.post("https://medicare-model.netlify.app", {
+		const response = await axios.post("http://localhost:6000/predict", {
 			input: inputData,
 		});
 		const prediction = response.data.prediction;
@@ -35,6 +35,8 @@ const createHealthData = async (req, res) => {
 		// Combine all data into healthData object
 		const healthData = {
 			userId: userId,
+			height: bmiData.height,
+			weight: bmiData.weight,
 			BMI: bmiData.BMI,
 			bmiStatus: bmiData.status,
 			glucose: glucoseData.glucose,
@@ -60,7 +62,8 @@ const getHealthDataByuserId = async (req, res) => {
 		const usersCollection = collection(db, "HealthOverall");
 		const docRef = doc(usersCollection, userId);
 		const snapshot = await getDoc(docRef);
-		const { sysBP, diaBP, bloodStatus, heartRate, BMI, bmiStatus, glucose, glucoseStatus } = snapshot.data();
+		const { sysBP, diaBP, bloodStatus, heartRate, BMI, height, weight, bmiStatus, glucose, glucoseStatus } =
+			snapshot.data();
 		const predict = await predictHealthStatus([sysBP, diaBP, BMI, heartRate, glucose]);
 		if (!snapshot.exists()) {
 			return res.status(404).json({ message: "Health data not found for this user" });
@@ -71,6 +74,8 @@ const getHealthDataByuserId = async (req, res) => {
 			heartRate,
 			bloodStatus,
 			BMI,
+			height,
+			weight,
 			bmiStatus,
 			glucose,
 			glucoseStatus,

@@ -7,6 +7,8 @@ const createBMI = async (req, res) => {
 		const data = {
 			userId: id,
 			BMI: req.body.bmi,
+			weight: req.body.weight,
+			height: req.body.height,
 			status: req.body.status,
 			date: new Date(),
 		};
