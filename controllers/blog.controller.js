@@ -1,10 +1,18 @@
-const { doc, setDoc, collection, getDocs, getDoc, updateDoc, deleteDoc } = require("firebase/firestore");
+const { doc, setDoc, collection, getDocs, getDoc, updateDoc, deleteDoc, query, where } = require("firebase/firestore");
 const { v4: uuidv4 } = require("uuid");
 const { db } = require("../database/config");
 
 const getAllBlogs = async (req, res) => {
 	try {
-		const blogsRef = collection(db, "blogs");
+		const { tag } = req.query; // Extract the 'tag' query parameter from the request
+
+		let blogsRef = collection(db, "blogs");
+
+		// If a tag query parameter is present, filter the blogs by tag
+		if (tag) {
+			blogsRef = query(blogsRef, where("tag", "array-contains", tag));
+		}
+
 		const snapshot = await getDocs(blogsRef);
 		const blogs = [];
 		snapshot.forEach((doc) => {
@@ -34,7 +42,23 @@ const getBlogById = async (req, res) => {
 		res.status(500).json({ message: "Failed to retrieve blog" });
 	}
 };
-
+const getMyBlogs = async (req, res) => {
+	try {
+		const userId = req.params.id;
+		const blogsRef = collection(db, "blogs");
+		const snapshot = await getDocs(blogsRef);
+		const blogs = [];
+		snapshot.forEach((doc) => {
+			if (doc.data().userId === userId) {
+				blogs.push(doc.data());
+			}
+		});
+		res.status(200).json(blogs);
+	} catch (error) {
+		console.error("Error retrieving blogs:", error);
+		res.status(500).json({ message: "Failed to retrieve blogs" });
+	}
+};
 const createBlog = async (req, res) => {
 	try {
 		const { userId, title, photo, userPhoto, tag, content, userName } = req.body;
@@ -97,6 +121,7 @@ const deleteBlog = async (req, res) => {
 
 module.exports = {
 	getAllBlogs,
+	getMyBlogs,
 	getBlogById,
 	createBlog,
 	updateBlog,
