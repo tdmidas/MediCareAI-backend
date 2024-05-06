@@ -1,5 +1,4 @@
-const express = require("express");
-const router = express.Router();
+const router = require("express").Router();
 const {
 	createAppointment,
 	getAllAppointments,
@@ -13,7 +12,7 @@ const {
 router.get("/", getAllAppointments);
 // Get appointment by Id route
 router.get("/", getAppointmentById);
-
+// Get my appointments route
 router.get("/my/:id", getMyAppointments);
 
 // Create appointment route

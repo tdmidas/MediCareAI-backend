@@ -2,77 +2,81 @@ const { doc, setDoc, collection, getDocs, updateDoc, deleteDoc } = require("fire
 const { v4: uuidv4 } = require("uuid");
 const { db } = require("../database/config");
 
+const getAllAppointments = async (req, res) => {
+	try {
+		const appointmentsRef = collection(db, "appointments");
+		const snapshot = await getDocs(appointmentsRef);
+		const appointments = [];
+		snapshot.forEach((doc) => {
+			appointments.push(doc.data());
+		});
+		res.status(200).json(appointments);
+	} catch (error) {
+		console.error("Error retrieving appointments:", error);
+		res.status(500).json({ message: "Failed to retrieve appointments" });
+	}
+};
+
+const getAppointmentById = async (req, res) => {
+	try {
+		const appointmentId = req.params.id;
+		const docRef = doc(db, "appointments", appointmentId);
+		const docSnap = await getDoc(docRef);
+
+		if (docSnap.exists()) {
+			const appointmentData = { id: docSnap.id, ...docSnap.data() };
+			res.status(200).json({ appointmentData });
+		} else {
+			res.status(404).json({ message: "Appointment not found" });
+		}
+	} catch (error) {
+		console.error("Error retrieving appointment:", error);
+		res.status(500).json({ message: "Failed to retrieve appointment" });
+	}
+};
+
 const createAppointment = async (req, res) => {
 	try {
-		const { userId, doctorId, doctorName, startTime, endTime, totalPrice, bookDate, isPaid, payMethod } = req.body;
+		// Extract appointment information from 'req.body'
+		const { userId, doctorId, doctorName, startTime, endTime, totalPrice, bookDate, isPaid, payMethod, state } =
+			req.body;
 
+		// Create an object containing appointment information
 		const appointmentData = {
-			appointmentId: uuidv4(),
 			userId,
 			doctorId,
 			doctorName,
 			startTime,
 			endTime,
 			totalPrice,
-			bookDate: new Date(),
+			bookDate,
 			isPaid,
 			payMethod,
-			state: "incomplete",
+			state,
 		};
 
-		const appointmentRef = doc(db, "appointments", appointmentData.appointmentId);
-		await setDoc(appointmentRef, appointmentData);
-		res.status(201).json({ message: "Appointment created successfully", appointmentData });
-	} catch (error) {
-		console.error("Error creating appointment:", error);
-		res.status(500).json({ message: "Failed to create appointment" });
-	}
-};
-const getMyAppointments = async (req, res) => {
-	const userId = req.params.id;
+		// Add the appointment object to the 'appointments' collection in Firestore
+		const appointmentRef = await db.collection("appointments").add(appointmentData);
 
-	try {
-		// Reference to the 'appointments' collection in Firestore
-		const appointmentsRef = collection(db, "appointments");
-
-		// Query appointments where userId matches
-		const querySnapshot = await getDocs(query(collection(appointmentsRef, userId)));
-
-		// Check if no appointments are found
-		if (querySnapshot.empty) {
-			return res.status(404).json({ message: "No appointments found" });
-		}
-		const appointments = [];
-
-		// Iterate through each document to extract information and add to 'appointments' array
-		querySnapshot.forEach((doc) => {
-			const appointmentData = doc.data();
-			const appointment = {
-				appointmenId: doc.id,
-				...appointmentData,
-			};
-			appointments.push(appointment);
-		});
-
-		// Return the list of appointments as JSON
-		res.status(200).json(appointments);
+		// Return success message and the ID of the newly created appointment
+		res.status(201).json({ message: "Appointment created successfully", appointmenId: appointmentRef.id });
 	} catch (error) {
 		// Handle errors if any occur during the process
-		console.error("Error getting appointments:", error);
-		res.status(500).json({ message: "Failed to get appointments" });
+		console.error("Error creating appointment:", error);
+		res.status(500).json({ message: "Failed to create appointment" });
 	}
 };
 
 const getAllAppointments = async (req, res) => {
 	try {
 		// Reference to the 'appointments' collection in Firestore
-		const appointmentsRef = collection(db, "appointments");
+		const appointmentsRef = db.collection("appointments");
 
-		// Get all documents from the 'appointments' collection
-		const querySnapshot = await getDocs(appointmentsRef);
+		// Get a snapshot of all documents in the 'appointments' collection
+		const snapshot = await appointmentsRef.get();
 
 		// Check if no appointments are found
-		if (querySnapshot.empty) {
+		if (snapshot.empty) {
 			return res.status(404).json({ message: "No appointments found" });
 		}
 
@@ -80,11 +84,20 @@ const getAllAppointments = async (req, res) => {
 		const appointments = [];
 
 		// Iterate through each document to extract information and add to 'appointments' array
-		querySnapshot.forEach((doc) => {
+		snapshot.forEach((doc) => {
 			const appointmentData = doc.data();
 			const appointment = {
 				appointmenId: doc.id,
-				...appointmentData,
+				userId: appointmentData.userId,
+				doctorId: appointmentData.doctorId,
+				doctorName: appointmentData.doctorName,
+				startTime: appointmentData.startTime,
+				endTime: appointmentData.endTime,
+				totalPrice: appointmentData.totalPrice,
+				bookDate: appointmentData.bookDate,
+				isPaid: appointmentData.isPaid,
+				payMethod: appointmentData.payMethod,
+				state: appointmentData.state,
 			};
 			appointments.push(appointment);
 		});
@@ -103,21 +116,30 @@ const getAppointmentById = async (req, res) => {
 
 	try {
 		// Reference to the appointment document with the corresponding 'appointmentId'
-		const appointmentRef = doc(db, "appointments", appointmentId);
+		const appointmentRef = db.collection("appointments").doc(appointmentId);
 
 		// Get the information of the appointment document
-		const docSnapshot = await getDoc(appointmentRef);
+		const doc = await appointmentRef.get();
 
 		// Check if the document exists
-		if (!docSnapshot.exists()) {
+		if (!doc.exists) {
 			return res.status(404).json({ message: "Appointment not found" });
 		}
 
-		// Extract appointment information from the document
-		const appointmentData = docSnapshot.data();
+		// Extract appointment information from the document and create an 'appointment' object
+		const appointmentData = doc.data();
 		const appointment = {
-			appointmenId: docSnapshot.id,
-			...appointmentData,
+			appointmenId: doc.id,
+			userId: appointmentData.userId,
+			doctorId: appointmentData.doctorId,
+			doctorName: appointmentData.doctorName,
+			startTime: appointmentData.startTime,
+			endTime: appointmentData.endTime,
+			totalPrice: appointmentData.totalPrice,
+			bookDate: appointmentData.bookDate,
+			isPaid: appointmentData.isPaid,
+			payMethod: appointmentData.payMethod,
+			state: appointmentData.state,
 		};
 
 		// Return the appointment information as JSON
@@ -133,14 +155,27 @@ const updateAppointment = async (req, res) => {
 	const appointmentId = req.params.id;
 
 	try {
-		// Reference to the appointment document with the corresponding 'appointmentId'
-		const appointmentRef = doc(db, "appointments", appointmentId);
+		// Check if the appointment exists
+		const appointmentRef = db.collection("appointments").doc(appointmentId);
+		const doc = await appointmentRef.get();
+
+		// If appointment does not exist, return 404 error
+		if (!doc.exists) {
+			return res.status(404).json({ message: "Appointment not found" });
+		}
 
 		// Update appointment information with data from request body
-		await updateDoc(appointmentRef, req.body);
+		await appointmentRef.update(req.body);
 
-		// Return success message after updating the appointment
-		res.status(200).json({ message: "Appointment updated successfully" });
+		// Retrieve updated appointment data after update
+		const updatedDoc = await appointmentRef.get();
+		const updatedAppointment = {
+			appointmenId: updatedDoc.id,
+			...updatedDoc.data(),
+		};
+
+		// Return updated appointment information as JSON response
+		res.status(200).json(updatedAppointment);
 	} catch (error) {
 		// Handle errors if any occur during the process
 		console.error("Error updating appointment:", error);
@@ -152,11 +187,17 @@ const deleteAppointment = async (req, res) => {
 	const appointmentId = req.params.id;
 
 	try {
-		// Reference to the appointment document with the corresponding 'appointmentId'
-		const appointmentRef = doc(db, "appointments", appointmentId);
+		// Check if the appointment exists
+		const appointmentRef = db.collection("appointments").doc(appointmentId);
+		const doc = await appointmentRef.get();
 
-		// Delete the appointment document
-		await deleteDoc(appointmentRef);
+		// If appointment does not exist, return 404 error
+		if (!doc.exists) {
+			return res.status(404).json({ message: "Appointment not found" });
+		}
+
+		// Delete the appointment
+		await appointmentRef.delete();
 
 		// Return success message after deleting the appointment
 		res.status(200).json({ message: "Appointment deleted successfully" });
