@@ -16,7 +16,6 @@ const uploadRoutes = require("./routes/upload.route");
 const chatbotRoutes = require("./routes/chatbot.route");
 const appointmentRoutes = require("./routes/appointment.route");
 const blogRoutes = require("./routes/blog.route");
-const appointmentRoutes = require("./routes/appointment.route");
 const serverless = require("serverless-http");
 
 // Import session middleware
@@ -61,7 +60,6 @@ app.use("/api/doctors", doctorRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/blogs", blogRoutes);
-app.use("/api/appointment", appointmentRoutes)
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/health/bmi", bmiRoutes);
 app.use("/api/health/glucose", glucoseRoutes);
