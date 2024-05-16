@@ -53,21 +53,56 @@ const getAppointmentById = async (req, res) => {
 
 const createAppointment = async (req, res) => {
 	try {
-		const { userId, doctorId, doctorName, startTime, endTime, totalPrice, bookDate, isPaid, payMethod, state } =
-			req.body;
+		const {
+			userId,
+			userName,
+			doctorId,
+			doctorName,
+			photo,
+			bookDate,
+			startHour,
+			endHour,
+			dayTime,
+			totalPrice,
+			isPaid,
+			payMethod,
+			nameOnCard,
+			cardNumber,
+			expiryMonth,
+			expiryYear,
+			cvv,
+			visitType,
+			address,
+			note,
+			diseaseDescription,
+			phone,
+		} = req.body;
 
 		const appointmentData = {
 			appointmentId: uuidv4(),
+			userName,
 			userId,
 			doctorId,
 			doctorName,
-			startTime,
-			endTime,
+			photo,
+			dayTime,
+			startHour,
+			endHour,
 			totalPrice,
 			bookDate,
 			isPaid,
 			payMethod,
-			state: "unpublished",
+			nameOnCard,
+			cardNumber,
+			expiryMonth,
+			expiryYear,
+			cvv,
+			visitType,
+			address,
+			note,
+			diseaseDescription,
+			phone,
+			state: "pending",
 		};
 
 		const docRef = doc(db, "appointments", appointmentData.appointmentId);
@@ -82,15 +117,31 @@ const createAppointment = async (req, res) => {
 const updateAppointment = async (req, res) => {
 	try {
 		const appointmentId = req.params.id;
-		const { doctorId, doctorName, startTime, endTime, totalPrice, bookDate, isPaid, payMethod, state } = req.body;
+		const {
+			doctorId,
+			doctorName,
+			startHour,
+			endHour,
+			totalPrice,
+			bookDate,
+			isPaid,
+			payMethod,
+			state,
+			address,
+			diseaseDescription,
+			phone,
+		} = req.body;
 
 		const docRef = doc(db, "appointments", appointmentId);
 		const updatedData = {
 			doctorId,
 			doctorName,
-			startTime,
-			endTime,
+			startHour,
+			endHour,
 			totalPrice,
+			address,
+			diseaseDescription,
+			phone,
 			bookDate,
 			isPaid,
 			payMethod,
