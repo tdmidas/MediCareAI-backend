@@ -73,7 +73,7 @@ const createBlog = async (req, res) => {
 			tag,
 			content,
 			postDate: new Date(),
-			state: "unpublished",
+			state: "published",
 		};
 		const docRef = doc(db, "blogs", blogData.blogId);
 		await setDoc(docRef, blogData);

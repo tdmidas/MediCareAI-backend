@@ -117,36 +117,11 @@ const createAppointment = async (req, res) => {
 const updateAppointment = async (req, res) => {
 	try {
 		const appointmentId = req.params.id;
-		const {
-			doctorId,
-			doctorName,
-			startHour,
-			endHour,
-			totalPrice,
-			bookDate,
-			isPaid,
-			payMethod,
-			state,
-			address,
-			diseaseDescription,
-			phone,
-		} = req.body;
+		const { state } = req.body;
 
 		const docRef = doc(db, "appointments", appointmentId);
 		const updatedData = {
-			doctorId,
-			doctorName,
-			startHour,
-			endHour,
-			totalPrice,
-			address,
-			diseaseDescription,
-			phone,
-			bookDate,
-			isPaid,
-			payMethod,
-			state,
-			lastUpdate: new Date(),
+			state: state,
 		};
 
 		await updateDoc(docRef, updatedData);
