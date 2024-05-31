@@ -8,15 +8,14 @@ const {
 	updateProfile,
 	updatePassword,
 } = require("../controllers/user.controller");
-const { authenticate, authorize } = require("../middlewares/auth.middleware");
 const router = express.Router();
 
-router.post("/", authenticate, authorize, createUser);
-router.get("/", authenticate, authorize, getAllUsers);
-router.get("/:id", authenticate, authorize, getUserById);
-router.put("/:id", authenticate, updateUser);
-router.put("/update-password/:id", authenticate, updatePassword);
-router.put("/update-profile/:id", authenticate, updateProfile);
-router.delete("/:id", authenticate, authorize, deleteUser);
+router.post("/", createUser);
+router.get("/", getAllUsers);
+router.get("/:id", getUserById);
+router.put("/:id", updateUser);
+router.put("/update-password/:id", updatePassword);
+router.put("/update-profile/:id", updateProfile);
+router.delete("/:id", deleteUser);
 
 module.exports = router;
