@@ -7,7 +7,6 @@ const {
 	deleteBloodPressure,
 } = require("../controllers/health/bloodPressure.controller");
 
-// Routes for handling health data
 router.post("/:userId", createBloodPressure);
 router.get("/:userId", getBloodPressureById);
 router.put("/:userId", updateBloodPressure);

@@ -4,7 +4,7 @@ const axios = require("axios");
 
 const predictHealthStatus = async (inputData) => {
 	try {
-		const response = await axios.post("https://medicareai-model.onrender.com/predict", {
+		const response = await axios.post("http://localhost:8080/predict", {
 			input: inputData,
 		});
 		const prediction = response.data.prediction;
@@ -32,9 +32,20 @@ const createHealthData = async (req, res) => {
 		const bloodPressureSnapshot = await getDoc(bloodPressureRef);
 		const bloodPressureData = bloodPressureSnapshot.exists() ? bloodPressureSnapshot.data() : {};
 
+		// Fetch cholesterol data
+
+		const cholesterolRef = doc(collection(db, "cholesterol"), userId);
+		const cholesterolSnapshot = await getDoc(cholesterolRef);
+		const cholesterolData = cholesterolSnapshot.exists() ? cholesterolSnapshot.data() : {};
+		// Fetch user data
+		const userRef = doc(collection(db, "users"), userId);
+		const userSnapshot = await getDoc(userRef);
+		const userData = userSnapshot.exists() ? userSnapshot.data() : {};
+
 		// Combine all data into healthData object
 		const healthData = {
 			userId: userId,
+			age: userData.age,
 			height: bmiData.height,
 			weight: bmiData.weight,
 			BMI: bmiData.BMI,
@@ -45,6 +56,8 @@ const createHealthData = async (req, res) => {
 			diaBP: bloodPressureData.diaBP,
 			heartRate: bloodPressureData.heartRate,
 			bloodStatus: bloodPressureData.status,
+			totChol: cholesterolData.totalCholesterol,
+			cholesterolStatus: cholesterolData.status,
 		};
 
 		const healthDataRef = doc(collection(db, "HealthOverall"), userId);
@@ -62,13 +75,27 @@ const getHealthDataByuserId = async (req, res) => {
 		const usersCollection = collection(db, "HealthOverall");
 		const docRef = doc(usersCollection, userId);
 		const snapshot = await getDoc(docRef);
-		const { sysBP, diaBP, bloodStatus, heartRate, BMI, height, weight, bmiStatus, glucose, glucoseStatus } =
-			snapshot.data();
-		const predict = await predictHealthStatus([sysBP, diaBP, BMI, heartRate, glucose]);
+		const {
+			age,
+			sysBP,
+			diaBP,
+			bloodStatus,
+			heartRate,
+			BMI,
+			height,
+			weight,
+			bmiStatus,
+			glucose,
+			glucoseStatus,
+			totChol,
+			cholesterolStatus,
+		} = snapshot.data();
+		const predict = await predictHealthStatus([age, totChol, sysBP, diaBP, BMI, heartRate, glucose]);
 		if (!snapshot.exists()) {
 			return res.status(404).json({ message: "Health data not found for this user" });
 		}
 		return res.status(200).json({
+			age,
 			sysBP,
 			diaBP,
 			heartRate,
@@ -79,6 +106,8 @@ const getHealthDataByuserId = async (req, res) => {
 			bmiStatus,
 			glucose,
 			glucoseStatus,
+			totChol,
+			cholesterolStatus,
 			predict,
 		});
 	} catch (error) {
@@ -102,6 +131,7 @@ const updateHealthDataByuserId = async (req, res) => {
 			heartRate,
 			BMI,
 			glucose,
+			tolChol,
 		});
 		return res.status(200).json({ message: "Health data updated successfully" });
 	} catch (error) {

@@ -100,12 +100,6 @@ const updateUser = async (req, res) => {
 	res.status(200).json(updatedUserDoc.data());
 };
 const updateProfile = async (req, res) => {
-	const { error } = profileSchema.validate(req.body);
-
-	if (error) {
-		return res.status(400).json({ message: error.details[0].message });
-	}
-
 	const userId = req.params.id;
 	const userDoc = doc(db, "users", userId);
 
@@ -115,11 +109,14 @@ const updateProfile = async (req, res) => {
 		return res.status(404).json({ message: "User not found" });
 	}
 
-	await updateDoc(userDoc, req.body);
-
-	const updatedUserDoc = await getDoc(userDoc);
-
-	res.status(200).json(updatedUserDoc.data());
+	try {
+		await updateDoc(userDoc, req.body);
+		const updatedUserDoc = await getDoc(userDoc);
+		res.status(200).json(updatedUserDoc.data());
+	} catch (error) {
+		console.error("Error updating profile:", error);
+		res.status(500).json({ message: "Internal server error" });
+	}
 };
 
 const deleteUser = async (req, res) => {

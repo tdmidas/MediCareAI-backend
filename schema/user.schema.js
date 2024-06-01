@@ -7,6 +7,7 @@ const userSchema = Joi.object({
 	password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")).required(),
 	bio: Joi.string(),
 	photoURL: Joi.string().uri(),
+	age: Joi.string().optional(),
 });
 
 module.exports = userSchema;

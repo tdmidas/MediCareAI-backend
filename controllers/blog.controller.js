@@ -72,6 +72,7 @@ const createBlog = async (req, res) => {
 			userPhoto,
 			tag,
 			content,
+			likes: 0,
 			postDate: new Date(),
 			state: "published",
 		};
@@ -118,6 +119,23 @@ const deleteBlog = async (req, res) => {
 		res.status(500).json({ message: "Failed to delete blog" });
 	}
 };
+const increaseLike = async (req, res) => {
+	try {
+		const blogId = req.params.id;
+		const docRef = doc(db, "blogs", blogId);
+		const docSnap = await getDoc(docRef);
+		if (docSnap.exists()) {
+			const { likes } = docSnap.data();
+			await updateDoc(docRef, { likes: parseInt(likes) + 1 });
+			res.status(200).json({ message: "Like count increased successfully" });
+		} else {
+			res.status(404).json({ message: "Blog not found" });
+		}
+	} catch (error) {
+		console.error("Error increasing like count:", error);
+		res.status(500).json({ message: "Failed to increase like count" });
+	}
+};
 
 module.exports = {
 	getAllBlogs,
@@ -126,4 +144,5 @@ module.exports = {
 	createBlog,
 	updateBlog,
 	deleteBlog,
+	increaseLike,
 };
