@@ -12,6 +12,20 @@ const getGoogleGenerativeAIResponse = async (userInput, modelId) => {
 
 	return text;
 };
+const sendMessage = async (req, res) => {
+	const { userInput } = req.body;
+
+	if (!userInput.trim()) {
+		return res.status(400).json({ message: "User input is required" });
+	}
+
+	try {
+		const botResponse = await getGoogleGenerativeAIResponse(userInput, "gemini-1.5-pro-latest");
+		return res.status(200).json({ message: botResponse });
+	} catch (error) {
+		return res.status(500).json({ message: "Internal server error" });
+	}
+};
 const parseResponse = (responseText) => {
 	// Extract title and content from the response
 	const titleMatch = responseText.match(/\*\*(.*?)\*\*/);
@@ -82,18 +96,5 @@ const sendMentalMessage = async (req, res) => {
 		return res.status(500).json({ message: "Internal server error" });
 	}
 };
-const sendMessage = async (req, res) => {
-	const { userInput, modelId } = req.body;
 
-	if (!userInput.trim()) {
-		return res.status(400).json({ message: "User input is required" });
-	}
-
-	try {
-		const botResponse = await getGoogleGenerativeAIResponse(userInput, "gemini-1.5-pro-latest");
-		return res.status(200).json({ message: botResponse });
-	} catch (error) {
-		return res.status(500).json({ message: "Internal server error" });
-	}
-};
 module.exports = { sendLungBloodMessage, sendCancerMessage, sendMentalMessage, sendBlogMessage, sendMessage };

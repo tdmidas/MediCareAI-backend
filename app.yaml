@@ -1,0 +1,8 @@
+running: python37
+api_version: 1
+threadsafe: true
+
+service: MediCareAI-model
+handlers:
+    - url: /.*
+      script: main.app
