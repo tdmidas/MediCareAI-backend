@@ -1,4 +1,15 @@
-const { doc, setDoc, collection, getDocs, getDoc, updateDoc, deleteDoc, query, where } = require("firebase/firestore");
+const {
+	doc,
+	setDoc,
+	collection,
+	getDocs,
+	getDoc,
+	updateDoc,
+	deleteDoc,
+	query,
+	where,
+	arrayUnion,
+} = require("firebase/firestore");
 const { v4: uuidv4 } = require("uuid");
 const { db } = require("../database/config");
 
@@ -122,18 +133,26 @@ const deleteBlog = async (req, res) => {
 const increaseLike = async (req, res) => {
 	try {
 		const blogId = req.params.id;
-		const docRef = doc(db, "blogs", blogId);
-		const docSnap = await getDoc(docRef);
-		if (docSnap.exists()) {
-			const { likes } = docSnap.data();
-			await updateDoc(docRef, { likes: parseInt(likes) + 1 });
-			res.status(200).json({ message: "Like count increased successfully" });
+		const userId = req.body.userId; // Assuming userId is provided in the request body
+		const blogRef = doc(db, "blogs", blogId);
+		const userRef = doc(db, "users", userId);
+		const blogSnap = await getDoc(blogRef);
+		const userSnap = await getDoc(userRef);
+
+		if (blogSnap.exists() && userSnap.exists()) {
+			const { likes } = blogSnap.data();
+			await updateDoc(blogRef, { likes: likes + 1 });
+
+			// Update the user's likedBlogs array
+			await updateDoc(userRef, { likedBlogs: arrayUnion(blogId) });
+
+			res.status(200).json({ message: "Blog like increased and user likedBlogs updated successfully" });
 		} else {
-			res.status(404).json({ message: "Blog not found" });
+			res.status(404).json({ message: "Blog or user not found" });
 		}
 	} catch (error) {
-		console.error("Error increasing like count:", error);
-		res.status(500).json({ message: "Failed to increase like count" });
+		console.error("Error increasing blog like:", error);
+		res.status(500).json({ message: "Failed to increase blog like" });
 	}
 };
 
