@@ -8,8 +8,68 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/"
+      "src": "/api/auth/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/search/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/users/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/comments/blog/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/comments/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/doctors/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/appointments/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/upload/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/blogs/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/reviews/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/health/bmi/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/health/glucose/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/health/bloodPressure/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/health/cholesterol/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/health/overall/(.*)",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/chat/(.*)",
+      "dest": "/index.js"
     }
   ]
 }
