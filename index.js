@@ -20,16 +20,6 @@ const commentRoutes = require("./routes/comment.route");
 const blogRoutes = require("./routes/blog.route");
 const searchRoutes = require("./routes/search.route");
 
-// Import session middleware
-const cookieSession = require("cookie-session");
-
-// Configure session middleware
-const sessionMiddleware = cookieSession({
-	name: "session",
-	keys: ["key1", "key2"],
-	maxAge: 1 * 60 * 1000, // 1 minute
-});
-
 // App Config
 const app = express();
 
@@ -51,9 +41,6 @@ app.use(
 );
 app.use(morgan("common"));
 app.use(express.json());
-
-// Use session middleware
-app.use(sessionMiddleware);
 
 // Routes
 app.use("/api/auth", authRoutes);
