@@ -34,11 +34,13 @@ app.use(bodyParser.json({ limit: "100mb" }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
 	cors({
-		origin: "*",
+		origin: "https://medicareai.tech", // Replace with your frontend's domain
 		methods: "GET,POST,PUT,DELETE",
-		credentials: false,
+		allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+		credentials: true,
 	})
 );
+
 app.use(morgan("common"));
 app.use(express.json());
 
