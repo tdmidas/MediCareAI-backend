@@ -1,63 +1,49 @@
 name: production
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+    push:
+        branches:
+            - master # Change this to 'master' if that's your default branch
+    pull_request:
+        branches:
+            - master # Change this to 'master' if that's your default branch
 
 jobs:
-  ci:
-    runs-on: ${{ matrix.os }}
+    deploy:
+        runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node: [20.x]
-    env:
-      FIREBASE_API_KEY : ${{secrets.FIREBASE_API_KEY}}
-      JWT_SECRET : "mutoyugi"
-      AWS_REGION: 'ap-southeast-1'
-      AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY}}
-      AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      S3_BUCKET_NAME: 'minhdai-aws'
+        env:
+            AWS_REGION: "us-east-1" # Change to your AWS region if needed
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+        steps:
+            - name: Checkout 🛎
+              uses: actions/checkout@v3
 
-    steps:
-      - name: Checkout 🛎
-        uses: actions/checkout@master
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.11" # Change to your required Python version
 
-      - name: Setup node env
-        uses: actions/setup-node@v2.1.2
-        with:
-          node-version: ${{ matrix.node }}
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -r requirements.txt
 
-      - name: Cache node_modules
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+            - name: Generate deployment package
+              run: zip -r deploy.zip * .[^.]* -x "**/__pycache__**" -x "**.git**"
 
-      - name: Installing NPM
-        run: npm install
+            - name: Beanstalk Deploy for app
+              uses: einaregilsson/beanstalk-deploy@v20 # Use the latest version available
+              with:
+                  aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  application_name: medicare-ai-model
+                  environment_name: Medicare-ai-model-env
+                  region: ${{ env.AWS_REGION }}
+                  version_label: "v-${{ github.sha }}"
+                  deployment_package: deploy.zip
 
-      - name: Generate deployment package
-        run: zip -r deploy.zip * .[^.]* -x "**node_modules**"
-
-      - name: Beanstalk Deploy for app
-        uses: einaregilsson/beanstalk-deploy@v16
-        with:
-          aws_access_key: ${{secrets.AWS_ACCESS_KEY}}
-          aws_secret_key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-          application_name: medicare-ai-backend
-          environment_name: Medicare-ai-backend-env
-          region: ap-southeast-1
-          version_label: "e-learn-${{ steps.format-time.outputs.replaced }}"
-          deployment_package: deploy.zip
-
-      - name: Deployed!
-        run: echo App deployed to ELB
+            - name: Deployed!
+              run: echo App deployed to Elastic Beanstalk
