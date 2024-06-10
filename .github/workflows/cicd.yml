@@ -25,7 +25,7 @@ jobs:
                   aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
                   aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
                   application_name: "medicareai-backend"
-                  environment_name: "Medicareai-backend-envv"
+                  environment_name: "Medicareai-backend-env"
                   version_label: ${{ github.sha }}
                   region: ap-southeast-1
                   deployment_package: medicareai-backend-build.zip
