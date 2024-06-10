@@ -4,7 +4,7 @@ const axios = require("axios");
 
 const predictHealthStatus = async (inputData) => {
 	try {
-		const response = await axios.post("https://medicareai-model.onrender.com/predict", {
+		const response = await axios.post("https://minhdai1234.pythonanywhere.com/predict", {
 			input: inputData,
 		});
 		const prediction = response.data.prediction;
