@@ -1,31 +1,63 @@
-name: CICD
+name: production
 
 on:
-    push:
-        branches:
-            - master
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
-    build-and-deploy:
-        runs-on: [ubuntu-latest]
-        steps:
-            - name: Checkout Source
-              uses: actions/checkout@v4
-            - name: Setup Node
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 20
-            - name: Install Dependencies
-              run: npm install
-            - name: Genrate Deployment Package
-              run: zip -r medicareai-backend-build.zip .
-            - name: Deploy to EB
-              uses: einaregilsson/beanstalk-deploy@v21
-              with:
-                  aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
-                  aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                  application_name: "medicare-ai-backend"
-                  environment_name: "Medicare-ai-backend-env"
-                  version_label: ${{ github.sha }}
-                  region: ap-southeast-1
-                  deployment_package: medicareai-backend-build.zip
+  ci:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node: [20.x]
+    env:
+      FIREBASE_API_KEY : ${{secrets.FIREBASE_API_KEY}}
+      JWT_SECRET : "mutoyugi"
+      AWS_REGION: 'ap-southeast-1'
+      AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY}}
+      AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      S3_BUCKET_NAME: 'minhdai-aws'
+
+
+    steps:
+      - name: Checkout 🛎
+        uses: actions/checkout@master
+
+      - name: Setup node env
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Installing NPM
+        run: npm install
+
+      - name: Generate deployment package
+        run: zip -r deploy.zip * .[^.]* -x "**node_modules**"
+
+      - name: Beanstalk Deploy for app
+        uses: einaregilsson/beanstalk-deploy@v16
+        with:
+          aws_access_key: ${{secrets.AWS_ACCESS_KEY}}
+          aws_secret_key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          application_name: medicare-ai-backend
+          environment_name: Medicare-ai-backend-env
+          region: ap-southeast-1
+          version_label: "e-learn-${{ steps.format-time.outputs.replaced }}"
+          deployment_package: deploy.zip
+
+      - name: Deployed!
+        run: echo App deployed to ELB
