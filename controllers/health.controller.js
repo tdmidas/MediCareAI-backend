@@ -4,7 +4,7 @@ const axios = require("axios");
 
 const predictHealthStatus = async (inputData) => {
 	try {
-		const response = await axios.post("https://minhdai1234.pythonanywhere.com/predict", {
+		const response = await axios.post("http://54.254.250.110:8000/predict", {
 			input: inputData,
 		});
 		const prediction = response.data.prediction;
@@ -90,6 +90,7 @@ const getHealthDataByuserId = async (req, res) => {
 			totChol,
 			cholesterolStatus,
 		} = snapshot.data();
+
 		const predict = await predictHealthStatus([age, totChol, sysBP, diaBP, BMI, heartRate, glucose]);
 		if (!snapshot.exists()) {
 			return res.status(404).json({ message: "Health data not found for this user" });
