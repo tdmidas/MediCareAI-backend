@@ -4,7 +4,7 @@ const axios = require("axios");
 
 const predictHealthStatus = async (inputData) => {
 	try {
-		const response = await axios.post("http://54.254.250.110:8000/predict", {
+		const response = await axios.post("http://54.254.220.173:8000/predict", {
 			input: inputData,
 		});
 		const prediction = response.data.prediction;
